@@ -1,0 +1,123 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "tonuser/examen-app"
+        DOCKER_REGISTRY = "https://registry.hub.docker.com"
+    }
+
+    options {
+        skipDefaultCheckout(true)
+        timestamps()
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${env.BUILD_NUMBER}")
+                }
+            }
+        }
+
+        stage('Tests avec docker-compose') {
+            steps {
+                sh """
+                  docker-compose down || true
+                  docker-compose up -d
+                  sleep 15
+                  # Exemple de test simple : adapter selon l'app
+                  curl -f http://localhost:8080 || (echo 'Tests KO' && exit 1)
+                  docker-compose down
+                """
+            }
+        }
+
+        stage('Push Image to DockerHub') {
+            steps {
+                script {
+                    docker.withRegistry(DOCKER_REGISTRY, 'dockerhub-creds') {
+                        dockerImage.push()
+                        dockerImage.push("latest")
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Dev') {
+            when {
+                anyOf {
+                    branch 'dev'
+                    branch 'develop'
+                }
+            }
+            steps {
+                sh """
+                  helm upgrade --install app-dev helm/app \
+                    --namespace dev \
+                    -f k8s/dev-values.yaml \
+                    --set image.tag=${env.BUILD_NUMBER}
+                """
+            }
+        }
+
+        stage('Deploy to QA') {
+            when {
+                branch 'qa'
+            }
+            steps {
+                sh """
+                  helm upgrade --install app-qa helm/app \
+                    --namespace qa \
+                    -f k8s/qa-values.yaml \
+                    --set image.tag=${env.BUILD_NUMBER}
+                """
+            }
+        }
+
+        stage('Deploy to Staging') {
+            when {
+                branch 'master'
+            }
+            steps {
+                sh """
+                  helm upgrade --install app-staging helm/app \
+                    --namespace staging \
+                    -f k8s/staging-values.yaml \
+                    --set image.tag=${env.BUILD_NUMBER}
+                """
+            }
+        }
+
+        stage('Deploy to Prod (manuel, master uniquement)') {
+            when {
+                branch 'master'
+            }
+            steps {
+                script {
+                    input message: "Confirmer le déploiement en PRODUCTION ?"
+                    sh """
+                      helm upgrade --install app-prod helm/app \
+                        --namespace prod \
+                        -f k8s/prod-values.yaml \
+                        --set image.tag=${env.BUILD_NUMBER}
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline terminé avec statut : ${currentBuild.currentResult}"
+        }
+    }
+}
+

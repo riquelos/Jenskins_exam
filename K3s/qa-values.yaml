@@ -1,0 +1,12 @@
+image:
+  repository: frankyfeukeu/exam_jenkins
+  tag: "latest"
+  pullPolicy: Always
+
+env:
+  APP_ENV: "qa"
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: null
