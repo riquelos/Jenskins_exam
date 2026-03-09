@@ -37,9 +37,11 @@ pipeline {
 
         stage('Push DockerHub') {
             steps {
-                withDockerRegistry([credentialsId: 'dockerhub']) {
-                    sh "docker push ${DOCKERHUB_REPO}-cast:${BUILD_NUMBER}"
-                    sh "docker push ${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}"
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                        docker.image("${DOCKERHUB_REPO}-cast:${BUILD_NUMBER}").push()
+                        docker.image("${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}").push(
+                    }
                 }
             }
         }
