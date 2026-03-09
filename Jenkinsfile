@@ -19,8 +19,8 @@ pipeline {
                 sh """
                     docker build \
                         -t ${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
-                        -f Jenkins_devops_exams/cast-service/Dockerfile \
-                        Jenkins_devops_exams/cast-service
+                        -f Jenkins_exam/cast-service/Dockerfile \
+                        Jenkins_exam/cast-service
                 """
             }
         }
@@ -30,8 +30,8 @@ pipeline {
                 sh """
                     docker build \
                         -t ${DOCKERHUB_REPO}-movie:${BUILD_NUMBER} \
-                        -f Jenkins_devops_exams/movie-service/Dockerfile \
-                        Jenkins_devops_exams/movie-service
+                        -f Jenkins_exam/movie-service/Dockerfile \
+                        Jenkins_exam/movie-service
                 """
             }
         }
