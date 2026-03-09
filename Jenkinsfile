@@ -16,14 +16,14 @@ pipeline {
 
         stage('Build Docker') {
             steps {
-                sh 'docker build -t $IMAGE:$BUILD_NUMBER .'
+                sh 'docker build -t $DOCKER_IMAGE:$BUILD_NUMBER .'
             }
         }
 
         stage('Push DockerHub') {
             steps {
                 withDockerRegistry([credentialsId: 'dockerhub']) {
-                    sh 'docker push $IMAGE:$BUILD_NUMBER'
+                    sh 'docker push $DOCKER_IMAGE:$BUILD_NUMBER'
                 }
             }
         }
