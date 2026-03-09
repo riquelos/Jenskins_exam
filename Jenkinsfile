@@ -18,8 +18,8 @@ pipeline {
                 sh """
                     docker build \
                         -t ${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
-                        -f Jenkins_exam/cast-service/Dockerfile \
-                        Jenkins_exam/cast-service
+                        -f cast-service/Dockerfile \
+                        cast-service
                 """
             }
         }
@@ -29,8 +29,8 @@ pipeline {
                 sh """
                     docker build \
                         -t ${DOCKERHUB_REPO}-movie:${BUILD_NUMBER} \
-                        -f Jenkins_exam/movie-service/Dockerfile \
-                        Jenkins_exam/movie-service
+                        -f movie-service/Dockerfile \
+                        movie-service
                 """
             }
         }
@@ -47,7 +47,7 @@ pipeline {
         stage('Deploy DEV') {
             steps {
                 sh """
-                    helm upgrade --install app ./Jenkins_exam/charts -n dev \
+                    helm upgrade --install app ./charts -n dev \
                         --set cast.image=${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
                         --set movie.image=${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}
                 """
@@ -57,7 +57,7 @@ pipeline {
         stage('Deploy QA') {
             steps {
                 sh """
-                    helm upgrade --install app ./Jenkins_exam/charts -n qa \
+                    helm upgrade --install app ./charts -n qa \
                         --set cast.image=${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
                         --set movie.image=${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}
                 """
@@ -67,7 +67,7 @@ pipeline {
         stage('Deploy STAGING') {
             steps {
                 sh """
-                    helm upgrade --install app ./Jenkins_exam/charts -n staging \
+                    helm upgrade --install app ./charts -n staging \
                         --set cast.image=${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
                         --set movie.image=${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}
                 """
@@ -81,7 +81,7 @@ pipeline {
             steps {
                 input message: "Deploy to production?"
                 sh """
-                    helm upgrade --install app ./Jenkins_exam/charts -n prod \
+                    helm upgrade --install app ./charts -n prod \
                         --set cast.image=${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
                         --set movie.image=${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}
                 """
