@@ -37,7 +37,7 @@ pipeline {
 
         stage('Push DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'Dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
                         echo "$PASS" | docker login -u "$USER" --password-stdin
                         docker push ${DOCKERHUB_REPO}-cast:${BUILD_NUMBER}
