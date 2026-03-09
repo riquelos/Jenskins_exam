@@ -10,7 +10,7 @@ pipeline {
 
         stage('Clone') {
             steps {
-                git 'https://github.com/riquelos/Jenkins_devops_exams.git'
+                git 'https://github.com/riquelos/Jenskins_exam.git'
             }
         }
 
