@@ -37,11 +37,12 @@ pipeline {
 
         stage('Push DockerHub') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-                        docker.image("${DOCKERHUB_REPO}-cast:${BUILD_NUMBER}").push()
-                        docker.image("${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}").push(
-                    }
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh """
+                        echo "$PASS" | docker login -u "$USER" --password-stdin
+                        docker push ${DOCKERHUB_REPO}-cast:${BUILD_NUMBER}
+                        docker push ${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}
+                    """
                 }
             }
         }
@@ -81,7 +82,7 @@ pipeline {
                 branch 'master'
             }
             steps {
-                input message: "Deploy to production?"
+                input message: "Déployer en production ?"
                 sh """
                     helm upgrade --install app ./charts -n prod \
                         --set cast.image=${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
