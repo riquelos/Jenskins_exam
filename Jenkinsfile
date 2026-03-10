@@ -51,6 +51,7 @@ pipeline {
             steps {
                 sh """
                     helm upgrade --install app ./charts -n dev \
+                        -f charts/values-dev.yaml
                         --set cast.image=${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
                         --set movie.image=${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}
                 """
@@ -61,6 +62,7 @@ pipeline {
             steps {
                 sh """
                     helm upgrade --install app ./charts -n qa \
+                        -f charts/values-qa.yaml \
                         --set cast.image=${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
                         --set movie.image=${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}
                 """
@@ -71,6 +73,7 @@ pipeline {
             steps {
                 sh """
                     helm upgrade --install app ./charts -n staging \
+                        -f charts/values-staging.yaml
                         --set cast.image=${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
                         --set movie.image=${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}
                 """
@@ -85,6 +88,7 @@ pipeline {
                 input message: "Déployer en production ?"
                 sh """
                     helm upgrade --install app ./charts -n prod \
+                        -f charts/values-prod.yaml
                         --set cast.image=${DOCKERHUB_REPO}-cast:${BUILD_NUMBER} \
                         --set movie.image=${DOCKERHUB_REPO}-movie:${BUILD_NUMBER}
                 """
